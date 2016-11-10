@@ -14,19 +14,11 @@
 # limitations under the License.
 #
 
-# Inherit from the common Open Source product configuration
-$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
-$(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base_telephony.mk)
-$(call inherit-product, $(SRC_TARGET_DIR)/product/product_launched_with_p.mk)
+# Inherit from guacamole device
+$(call inherit-product, device/oneplus/guacamole/aosp_guacamole.mk)
 
 PRODUCT_NAME := ev_guacamole
-PRODUCT_DEVICE := guacamole
-PRODUCT_BRAND := OnePlus
 PRODUCT_MODEL := guacamole
-PRODUCT_MANUFACTURER := OnePlus
-PRODUCT_RESTRICT_VENDOR_FILES := false
-
-$(call inherit-product, device/oneplus/guacamole/device.mk)
 
 # Inherit some common evervolv stuff.
 $(call inherit-product, $(SRC_EVERVOLV_DIR)/config/common_full_phone.mk)
