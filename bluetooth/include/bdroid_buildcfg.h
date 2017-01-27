@@ -21,7 +21,27 @@
 
 #ifndef _BDROID_BUILDCFG_H
 #define _BDROID_BUILDCFG_H
-#define BTM_DEF_LOCAL_NAME   "OnePlus 7 Pro"
+
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+int32_t property_get_int32(const char *key, int32_t default_value);
+#ifdef __cplusplus
+}
+#endif
+
+static inline const char* BtmGetDefaultName()
+{
+    int32_t project_name = property_get_int32("ro.boot.project_name", 0);
+    if (project_name != 18857)
+        return "OnePlus 7 Pro";
+    return "OnePlus 7";
+}
+
+#define BTM_DEF_LOCAL_NAME BtmGetDefaultName()
+
 // Disables read remote device feature
 #define BTM_WBS_INCLUDED TRUE
 #define BTIF_HF_WBS_PREFERRED TRUE
