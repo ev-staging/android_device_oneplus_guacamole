@@ -16,7 +16,7 @@
 
 # Inherit from the common Open Source product configuration
 $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
-$(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base_telephony.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/mainline.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/product_launched_with_p.mk)
 
 PRODUCT_NAME := aosp_guacamole
@@ -29,6 +29,10 @@ PRODUCT_RESTRICT_VENDOR_FILES := false
 $(call inherit-product, device/oneplus/guacamole/device.mk)
 $(call inherit-product-if-exists, vendor/oneplus/guacamole/guacamole-vendor.mk)
 
-PRODUCT_PACKAGES += \
-    Launcher3
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.config.ringtone=Ring_Synth_04.ogg \
+    ro.com.android.dataroaming=true
 
+PRODUCT_PACKAGES += \
+    PhotoTable \
+    WAPPushManager
