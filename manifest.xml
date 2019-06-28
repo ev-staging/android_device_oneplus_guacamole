@@ -1,6 +1,6 @@
 <manifest version="1.0" type="device" target-level="3">
     <hal format="hidl">
-        <name>vendor.lineage.camera.motor</name>
+        <name>vendor.evervolv.camera.motor</name>
         <transport>hwbinder</transport>
         <version>1.0</version>
         <interface>
