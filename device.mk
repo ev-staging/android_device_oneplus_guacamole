@@ -6,18 +6,22 @@
 $(call inherit-product, $(SRC_TARGET_DIR)/product/product_launched_with_p.mk)
 $(call inherit-product, device/oneplus/sm8150-common/common.mk)
 
+PRODUCT_AAPT_CONFIG := xxxhdpi
+PRODUCT_AAPT_PREF_CONFIG := xxxhdpi
+PRODUCT_CHARACTERISTICS := nosdcard
+
 # Vendor properties
 -include $(LOCAL_PATH)/vendor_props.mk
 
 # Overlays
 DEVICE_PACKAGE_OVERLAYS += \
     $(LOCAL_PATH)/overlay \
-    $(LOCAL_PATH)/overlay-lineage
+    $(LOCAL_PATH)/overlay-ev
 
 # Camera
 PRODUCT_PACKAGES += \
-    vendor.lineage.camera.motor@1.0 \
-    vendor.lineage.camera.motor@1.0-service.oneplus_msmnile \
+    vendor.evervolv.camera.motor@1.0 \
+    vendor.evervolv.camera.motor@1.0-service.oneplus_msmnile \
     OnePlusCameraHelper
 
 # Device init scripts
