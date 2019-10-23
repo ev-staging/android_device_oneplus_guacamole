@@ -27,105 +27,108 @@
    IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstdlib>
-#include <unistd.h>
-#include <fcntl.h>
 #include <android-base/logging.h>
 #include <android-base/properties.h>
 
+#include <string>
+#define _REALLY_INCLUDE_SYS__SYSTEM_PROPERTIES_H_
+#include <sys/_system_properties.h>
+
 #include "property_service.h"
-#include "log.h"
+#include "vendor_init.h"
 
-namespace android {
-namespace init {
+using ::android::init::property_set;
 
-void load_op7pro(const char *model) {
-    property_set("ro.product.model", model);
-    property_set("ro.product.name", "OnePlus7Pro");
-    property_set("ro.build.product", "OnePlus7Pro");
-    property_set("ro.product.device", "OnePlus7Pro");
-    property_set("ro.vendor.product.device", "OnePlus7Pro");
-    property_set("ro.display.series", "OnePlus 7 Pro");
+constexpr const char* RO_PROP_SOURCES[] = {
+        nullptr, "product.", "product_services.", "odm.", "vendor.", "system.", "bootimage.",
+};
+
+constexpr const char* BUILD_DEVICE[] = {
+        "OnePlus7",
+        "OnePlus7Pro",
+        "OnePlus7ProNR",
+};
+
+constexpr const char* BUILD_DESCRIPTION[] = {
+        "OnePlus7-user 10 QKQ1.190716.003 1910280100 release-keys",
+        "OnePlus7Pro-user 10 QKQ1.190716.003 1910280100 release-keys",
+        "OnePlus7ProNR-user 10 QKQ1.190716.003 1910280100 release-keys",
+};
+
+constexpr const char* BUILD_FINGERPRINT[] = {
+        "OnePlus/OnePlus7/OnePlus7:10/QKQ1.190716.003/1910280100:user/release-keys",
+        "OnePlus/OnePlus7Pro/OnePlus7Pro:10/QKQ1.190716.003/1910280100:user/release-keys",
+        "OnePlus/OnePlus7ProNR/OnePlus7ProNR:10/QKQ1.190716.003/1910280100:user/release-keys",
+};
+
+void property_override(char const prop[], char const value[]) {
+    prop_info* pi = (prop_info*)__system_property_find(prop);
+    if (pi) {
+        __system_property_update(pi, value, strlen(value));
+    }
 }
 
-void load_op7pro5g(const char *model) {
-    property_set("ro.product.model", model);
-    property_set("ro.product.name", "OnePlus7ProNR");
-    property_set("ro.build.product", "OnePlus7ProNR");
-    property_set("ro.product.device", "OnePlus7ProNR");
-    property_set("ro.vendor.product.device", "OnePlus7ProNR");
-    property_set("ro.display.series", "OnePlus 7 Pro 5G");
-}
+void load_props(const char* model, int id) {
+    const auto ro_prop_override = [](const char* source, const char* prop, const char* value,
+                                     bool product) {
+        std::string prop_name = "ro.";
 
-void load_op7(const char *model) {
-    property_set("ro.product.model", model);
-    property_set("ro.product.name", "OnePlus7");
-    property_set("ro.build.product", "OnePlus7");
-    property_set("ro.product.device", "OnePlus7");
-    property_set("ro.vendor.product.device", "OnePlus7");
-    property_set("ro.display.series", "OnePlus 7");
+        if (product) prop_name += "product.";
+        if (source != nullptr) prop_name += source;
+        if (!product) prop_name += "build.";
+        prop_name += prop;
+
+        property_override(prop_name.c_str(), value);
+    };
+
+    for (const auto& source : RO_PROP_SOURCES) {
+        ro_prop_override(source, "device", BUILD_DEVICE[id], true);
+        ro_prop_override(source, "model", model, true);
+        ro_prop_override(source, "fingerprint", BUILD_FINGERPRINT[id],
+                         false);
+    }
+    ro_prop_override(nullptr, "description", BUILD_DESCRIPTION[id], false);
+    ro_prop_override(nullptr, "product", "OnePlus7", false);
+
+    // ro.build.fingerprint property has not been set
+    property_set("ro.build.fingerprint", BUILD_FINGERPRINT[id]);
 }
 
 void vendor_load_properties() {
     int project_name = stoi(android::base::GetProperty("ro.boot.project_name", ""));
-    int rf_version = stoi(android::base::GetProperty("ro.boot.rf_version", ""));
-    switch(project_name){
-		case 18821:
-			switch (rf_version){
-				case 1:
-					/* China*/
-					load_op7pro("GM1910");
-					break;
-				case 3:
-					/* India*/
-					load_op7pro("GM1911");
-					break;
-				case 4:
-					/* Europe */
-					load_op7pro("GM1913");
-					break;
-				case 5:
-					/* Global / US Unlocked */
-					load_op7pro("GM1917");
-					break;
-				default:
-					/* Generic*/
-					load_op7pro("GM1917");
-					break;
-			}
-		case 18831:
-			/* T-Mobile */
-			load_op7pro("GM1915");
-			break;
-		case 18827:
-			/* 5g Europe */
-			load_op7pro5g("GM1920");
-			break;
-		case 18857:
-			switch (rf_version){
-				case 1:
-					/* China*/
-					load_op7("GM1900");
-					break;
-				case 3:
-					/* India*/
-					load_op7("GM1901");
-					break;
-				case 4:
-					/* Europe */
-					load_op7("GM1903");
-					break;
-				case 5:
-					/* Global / US Unlocked */
-					load_op7("GM1907");
-					break;
-				default:
-					/* Generic */
-					load_op7("GM1907");
-					break;
-			}
-	}
-}
 
-}  // namespace init
-}  // namespace android
+    if (project_name == 18827) {
+        /* 5G */
+        load_props("GM1920", 2);
+        return;
+    } else  if (project_name == 18831) {
+        /* T-Mobile */
+        load_props("GM1915", 1);
+        return;
+    }
+
+    int rf_version = stoi(android::base::GetProperty("ro.boot.rf_version", ""));
+    bool is_pro = project_name != 18857;
+    switch (rf_version){
+        case 1:
+            /* China*/
+            load_props(is_pro ? "GM1910" : "GM1900", is_pro ? 1 : 0);
+            break;
+        case 3:
+            /* India*/
+            load_props(is_pro ? "GM1911" : "GM1901", is_pro ? 1 : 0);
+            break;
+        case 4:
+            /* Europe */
+            load_props(is_pro ? "GM1913" : "GM1903", is_pro ? 1 : 0);
+            break;
+        case 5:
+            /* Global / US Unlocked */
+            load_props(is_pro ? "GM1917" : "GM1907", is_pro ? 1 : 0);
+            break;
+        default:
+            /* Generic*/
+            load_props(is_pro ? "GM1917" : "GM1907", is_pro ? 1 : 0);
+            break;
+    }
+}
