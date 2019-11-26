@@ -29,3 +29,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     fstab.qcom \
     init.display.guacamole.rc
+
+# Get non-open-source specific aspects
+$(call inherit-product, vendor/oneplus/guacamole/guacamole-vendor.mk)
