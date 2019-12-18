@@ -27,7 +27,7 @@ $(call inherit-product, $(SRC_EVERVOLV_DIR)/config/common_full_phone.mk)
 BOOT_ANIMATION_SIZE := 1080p
 
 # Build info
-BUILD_FINGERPRINT := "OnePlus/OnePlus7Pro/OnePlus7Pro:9/PKQ1.190110.001/1906032330:user/release-keys"
+BUILD_FINGERPRINT := "OnePlus/OnePlus7Pro/OnePlus7Pro:10/QKQ1.190716.003/1910280100:user/release-keys"
 
 PRODUCT_GMS_CLIENTID_BASE := android-oneplus
 
